@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#16233F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="词根背单词">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<title>词根背单词 · 高考高频词</title>
+<script>
+/* PWA：仅在 http(s) 环境下注册离线缓存，file:// 直接打开时跳过 */
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function () { /* 忽略 */ });
+  });
+}
+</script>
+<style>
+:root{
+  --ink:#1F2A44; --acc:#0E7C7B; --acc2:#D1495B; --gold:#B7950B;
+  --bg:#F0F2F7; --card:#FFFFFF; --line:#E2E6EF; --gray:#7A8199; --ok:#1E8449; --bad:#C0392B;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;max-width:520px;margin:0 auto;display:flex;flex-direction:column}
+header{background:linear-gradient(135deg,#16233F,#1F3A6E);color:#fff;padding:12px 16px 10px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(22,35,63,.25)}
+.userrow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.userrow .ava{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.userrow .uname{font-size:.85rem;font-weight:700}
+.userrow .level{font-size:.6rem;color:#FFD166;border:1px solid rgba(255,209,102,.5);border-radius:8px;padding:1px 7px;margin-left:2px}
+.userrow .score{margin-left:auto;font-size:.8rem;color:#FFD166;font-weight:700}
+.duebar{display:flex;gap:8px}
+.chip{flex:1;background:rgba(255,255,255,.12);border-radius:8px;padding:6px 4px;text-align:center}
+.chip b{display:block;font-size:1.05rem;color:#FFD166}
+.chip span{font-size:.62rem;color:#C9D6EC}
+main{flex:1;padding:14px 14px 90px;overflow-y:auto}
+.card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(31,42,68,.08);margin-bottom:12px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.modebtn{border:none;border-radius:14px;padding:16px 10px;color:#fff;font-size:.95rem;font-weight:700;text-align:left;position:relative;min-height:86px;box-shadow:0 2px 6px rgba(31,42,68,.15)}
+.modebtn small{display:block;font-weight:400;font-size:.68rem;opacity:.85;margin-top:5px;line-height:1.5}
+.modebtn .cnt{position:absolute;top:8px;right:10px;background:rgba(255,255,255,.25);border-radius:10px;font-size:.62rem;padding:2px 8px}
+.m-listen{background:linear-gradient(135deg,#0E7C7B,#14A0A0)}
+.m-type{background:linear-gradient(135deg,#D1495B,#E5697B)}
+.m-learn{background:linear-gradient(135deg,#2E86AB,#4AA3C7)}
+.m-review{background:linear-gradient(135deg,#6C3483,#8E44AD)}
+.m-wrong{background:linear-gradient(135deg,#B7950B,#D4AC0D)}
+.m-wrong{grid-column:1 / -1;min-height:64px}
+h2.t{font-size:.95rem;margin:4px 0 10px;display:flex;align-items:center;gap:6px}
+h2.t::before{content:"";width:4px;height:16px;border-radius:2px;background:var(--acc)}
+.wordcard{text-align:center;padding:24px 16px}
+.wordcard .phon{font-size:1rem;color:var(--acc);margin-top:6px;letter-spacing:1px}
+.wordcard .word{font-size:2rem;font-weight:800;letter-spacing:1px;margin-top:4px;word-break:break-all}
+.wordcard .mean{font-size:.95rem;color:#3D4763;margin-top:10px;line-height:1.6}
+.wordcard .sent{font-size:.8rem;color:var(--gray);margin-top:12px;line-height:1.6;border-top:1px dashed var(--line);padding-top:10px}
+.stagepill{display:inline-block;font-size:.65rem;padding:2px 10px;border-radius:10px;background:#E8F4F4;color:var(--acc);margin-top:8px}
+.btnrow{display:flex;gap:10px;margin-top:14px}
+.btn{flex:1;border:none;border-radius:10px;padding:13px 0;font-size:.95rem;font-weight:700;color:#fff}
+.btn.ok{background:var(--ok)} .btn.bad{background:var(--bad)} .btn.plain{background:#5A6B8C} .btn.gold{background:var(--gold)}
+.btn:active{transform:scale(.97)}
+.prompt{background:#F7F9FC;border-radius:12px;padding:16px;text-align:center;margin-bottom:14px}
+.prompt .lab{font-size:.7rem;color:var(--gray)}
+.prompt .big{font-size:1.35rem;font-weight:700;margin-top:8px;line-height:1.7}
+.prompt .small{font-size:.8rem;color:var(--gray);margin-top:6px;line-height:1.6}
+.speakbtn{display:inline-flex;align-items:center;gap:6px;background:var(--acc);color:#fff;border:none;border-radius:20px;padding:9px 22px;font-size:.95rem;margin-top:10px}
+.answer{display:flex;gap:8px;margin-bottom:12px}
+.answer input{flex:1;min-width:0;border:2px solid var(--line);border-radius:10px;padding:13px 14px;font-size:1.05rem;outline:none;background:#fff;letter-spacing:1px}
+.answer input:focus{border-color:var(--acc)}
+.answer button{border:none;border-radius:10px;padding:0 22px;background:var(--ink);color:#fff;font-size:.95rem;font-weight:700}
+.feedback{border-radius:12px;padding:14px;margin-bottom:12px;display:none}
+.feedback.show{display:block}
+.feedback.right{background:#E9F7EF;border:1px solid #ABD7BC}
+.feedback.wrong{background:#FDEDEC;border:1px solid #F1B0AA}
+.feedback .head{font-weight:800;font-size:1rem;margin-bottom:6px}
+.feedback.right .head{color:var(--ok)} .feedback.wrong .head{color:var(--bad)}
+.fbword{font-size:1.5rem;font-weight:800;margin:4px 0}
+.fbphon{color:var(--acc);font-size:.9rem}
+.fbmean{font-size:.85rem;color:#3D4763;margin-top:6px;line-height:1.6}
+.fbsent{font-size:.75rem;color:var(--gray);margin-top:8px;line-height:1.6}
+.fbscore{font-size:.75rem;margin-top:8px;color:var(--gold);font-weight:700}
+.nextrow{display:flex;gap:10px}
+.hintbtn{background:none;border:1px solid var(--line);color:var(--gray);border-radius:10px;padding:8px 14px;font-size:.78rem}
+.streakbar{text-align:center;font-size:.8rem;color:var(--gold);font-weight:700;margin-bottom:10px;min-height:1.2em}
+.progress{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:12px}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),#14A0A0);transition:width .3s}
+.sessionend{text-align:center;padding:30px 16px}
+.sessionend .emoji{font-size:3rem}
+.sessionend p{margin:12px 0;color:var(--gray);font-size:.85rem;line-height:1.7}
+.sessionend .bigscore{font-size:2.2rem;font-weight:800;color:var(--gold);margin:8px 0}
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.stat{background:#F7F9FC;border-radius:12px;padding:12px 8px;text-align:center}
+.stat b{display:block;font-size:1.3rem}
+.stat span{font-size:.65rem;color:var(--gray)}
+.stagerow{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:.75rem}
+.stagerow .bar{flex:1;height:14px;background:#EDF0F6;border-radius:7px;overflow:hidden}
+.stagerow .bar i{display:block;height:100%;border-radius:7px}
+.reset{background:none;border:1px solid var(--line);color:var(--bad);border-radius:10px;padding:10px;width:100%;font-size:.85rem;margin-top:10px}
+/* 错题本 */
+.wrongitem{display:flex;align-items:center;gap:10px;padding:11px 4px;border-bottom:1px solid var(--line)}
+.wrongitem .winfo{flex:1;min-width:0}
+.wrongitem .wword{font-weight:800;font-size:1rem}
+.wrongitem .wphon{color:var(--acc);font-size:.75rem;margin-left:6px}
+.wrongitem .wmean{font-size:.72rem;color:var(--gray);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wrongitem .winput{font-size:.7rem;color:var(--bad);margin-top:2px}
+.wrongitem .wcount{font-size:.65rem;color:#fff;background:var(--acc2);border-radius:9px;padding:2px 8px;flex-shrink:0}
+.wrongitem button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;font-size:.75rem;flex-shrink:0}
+.empty{text-align:center;color:var(--gray);font-size:.8rem;padding:36px 0;line-height:1.8}
+/* 登录 */
+#login{position:fixed;inset:0;background:linear-gradient(160deg,#16233F,#1F3A6E);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.loginbox{background:#fff;border-radius:18px;padding:26px 22px;width:100%;max-width:360px}
+.loginbox h1{font-size:1.3rem;text-align:center;margin-bottom:2px}
+.loginbox .sub{text-align:center;font-size:.7rem;color:var(--gray);margin-bottom:18px}
+.loginbox input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;font-size:.95rem;margin-bottom:10px;outline:none}
+.loginbox input:focus{border-color:var(--acc)}
+.loginbox>button{width:100%;border:none;border-radius:10px;padding:13px;font-size:.95rem;font-weight:700;color:#fff;background:var(--acc);margin-top:4px}
+.loginbox .switch{text-align:center;font-size:.75rem;color:var(--gray);margin-top:14px}
+.loginbox .switch a{color:var(--acc);font-weight:700}
+.loginbox .err{color:var(--bad);font-size:.72rem;text-align:center;min-height:1em;margin-bottom:6px}
+.tabs{display:flex;border-bottom:1.5px solid var(--line);margin-bottom:14px}
+.tabs span{flex:1;text-align:center;padding:9px 0;font-size:.92rem;font-weight:700;color:var(--gray);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1.5px}
+.tabs span.on{color:var(--acc);border-bottom-color:var(--acc)}
+.userlist{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.userlist .uitem{border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;font-size:.85rem;background:#fff;color:var(--ink);width:auto}
+.userlist .uitem.sel{border-color:var(--acc);background:#E8F4F4;font-weight:700}
+/* 设置 */
+.setrow{display:flex;align-items:center;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--line);font-size:.85rem;gap:8px}
+.setrow input[type=number]{width:70px;border:1px solid var(--line);border-radius:8px;padding:6px;text-align:center;font-size:.9rem}
+.setrow select{border:1px solid var(--line);border-radius:8px;padding:6px;font-size:.85rem}
+.setrow input[type=text]{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:.88rem;width:130px}
+.avapick{display:flex;gap:6px}
+.avapick span{font-size:1.25rem;border:1.5px solid var(--line);border-radius:10px;padding:4px 6px}
+.avapick span.sel{border-color:var(--acc);background:#E8F4F4}
+.tip{font-size:.7rem;color:var(--gray);line-height:1.7;margin-top:10px}
+.hidden{display:none!important}
+/* 底部导航 */
+nav{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;background:#fff;border-top:1px solid var(--line);display:flex;z-index:10}
+nav button{flex:1;border:none;background:none;padding:9px 0 12px;font-size:.62rem;color:var(--gray);display:flex;flex-direction:column;align-items:center;gap:3px}
+nav button .ico{font-size:1.15rem;line-height:1}
+nav button.on{color:var(--acc);font-weight:700}
+</style>
+</head>
+<body>
+
+<!-- 登录/注册 -->
+<div id="login" class="hidden">
+  <div class="loginbox">
+    <h1>词根背单词</h1>
+    <div class="sub">高考 651 高频词 · 艾宾浩斯记忆曲线</div>
+    <div class="tabs"><span id="tabLogin" class="on">登 录</span><span id="tabReg">注 册</span></div>
+    <div class="userlist hidden" id="userList"></div>
+    <input id="loginName" type="text" placeholder="用户名（2-12 个字符）" maxlength="12">
+    <input id="loginPwd" type="password" placeholder="密码（至少 4 位）">
+    <input id="loginPwd2" type="password" placeholder="确认密码" class="hidden">
+    <div class="err" id="loginErr"></div>
+    <button id="loginBtn">登 录</button>
+    <div class="switch"><a id="switchLink">没有账号？点上方「注册」</a></div>
+    <div class="tip" style="text-align:center">账号数据仅保存在本机浏览器中，不同用户进度互不影响。</div>
+  </div>
+</div>
+
+<header class="hidden" id="appHeader">
+  <div class="userrow">
+    <div class="ava" id="hAvatar">📚</div>
+    <div><span class="uname" id="hName">--</span> <span class="level" id="hLevel">学童</span></div>
+    <div class="score">🏆 <span id="hScore">0</span></div>
+  </div>
+  <div class="duebar">
+    <div class="chip"><b id="dueReview">0</b><span>待复习</span></div>
+    <div class="chip"><b id="dueNew">0</b><span>今日新词</span></div>
+    <div class="chip"><b id="dueWrong">0</b><span>错题</span></div>
+    <div class="chip"><b id="todayScore">0</b><span>今日得分</span></div>
+  </div>
+</header>
+
+<main class="hidden" id="appMain">
+  <!-- 首页 -->
+  <section id="page-home">
+    <div class="modes">
+      <button class="modebtn m-listen" data-go="listen">🔊 听音写词<small>播放发音，听音默写</small><span class="cnt" id="cntListen">0</span></button>
+      <button class="modebtn m-type" data-go="type">✍️ 看中写词<small>看中文释义默写单词</small><span class="cnt" id="cntType">0</span></button>
+      <button class="modebtn m-learn" data-go="learn">📖 学新词<small>浏览单词卡，认识/不认识</small><span class="cnt" id="cntLearn">0</span></button>
+      <button class="modebtn m-review" data-go="mixed">🎯 混合复习<small>听音+看中文随机混合</small><span class="cnt" id="cntMixed">0</span></button>
+      <button class="modebtn m-wrong" data-go="wrong">📕 错题重测<small>重测错题本里的单词，答对 2 次自动移除</small><span class="cnt" id="cntWrong">0</span></button>
+    </div>
+    <div class="card">
+      <h2 class="t">记忆曲线说明</h2>
+      <div class="tip">按艾宾浩斯遗忘曲线安排复习：新词 → 20分钟 → 1小时 → 9小时 → 1天 → 2天 → 6天 → 14天 → 30天 → 60天，共 9 轮。答对进入下一轮，答错 10 分钟后重学并记入错题本。打分规则：答对 +10 分，阶段越高加成越多，5 秒内答对额外 +5 分，每连对 5 题再 +20 分。</div>
+    </div>
+  </section>
+
+  <!-- 游戏页 -->
+  <section id="page-game" class="hidden">
+    <div class="progress"><i id="prog" style="width:0%"></i></div>
+    <div class="streakbar" id="streakBar"></div>
+    <div id="gamebody"></div>
+  </section>
+
+  <!-- 错题本页 -->
+  <section id="page-wrong" class="hidden">
+    <div class="card">
+      <h2 class="t">错题本 <span id="wrongTotal" style="font-size:.72rem;color:var(--gray)"></span></h2>
+      <div id="wrongList"></div>
+      <div class="btnrow" style="margin-top:12px">
+        <button class="btn gold" id="wrongStart">📕 开始错题重测</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 统计页 -->
+  <section id="page-stats" class="hidden">
+    <div class="statgrid">
+      <div class="stat"><b id="stTotal" style="color:var(--acc)">0</b><span>已学单词</span></div>
+      <div class="stat"><b id="stMaster" style="color:var(--ok)">0</b><span>已掌握</span></div>
+      <div class="stat"><b id="stToday" style="color:var(--acc2)">0</b><span>今日完成</span></div>
+    </div>
+    <div class="card">
+      <h2 class="t">记忆阶段分布</h2>
+      <div id="stageBars"></div>
+    </div>
+    <div class="card">
+      <h2 class="t">战绩</h2>
+      <div class="tip" id="todayLine">--</div>
+      <div class="tip" id="scoreLine">--</div>
+    </div>
+    <button class="reset" id="resetBtn">清空我的学习记录</button>
+  </section>
+
+  <!-- 我的/设置页 -->
+  <section id="page-set" class="hidden">
+    <div class="card">
+      <h2 class="t">个性化设置</h2>
+      <div class="setrow"><span>昵称</span><input type="text" id="setNick" maxlength="10"></div>
+      <div class="setrow"><span>头像</span><div class="avapick" id="setAvatar"></div></div>
+      <div class="setrow"><span>每日新词上限</span><input type="number" id="setDaily" min="5" max="100" step="5"></div>
+      <div class="setrow"><span>每轮出题数量</span><input type="number" id="setRound" min="5" max="50" step="5"></div>
+      <div class="setrow"><span>朗读语速</span><select id="setRate"><option value="0.7">慢</option><option value="0.9">标准</option><option value="1.1">快</option></select></div>
+      <div class="setrow"><span>混合题型偏好</span><select id="setPrefer"><option value="mix">随机</option><option value="listen">听音优先</option><option value="type">看中优先</option></select></div>
+      <div class="tip">听音写词使用浏览器语音合成（TTS），iPhone/Safari、安卓 Chrome 均支持离线英文朗读。</div>
+    </div>
+    <div class="card">
+      <h2 class="t">账号</h2>
+      <button class="btn plain" id="switchUserBtn" style="width:100%">切换用户 / 添加账号</button>
+    </div>
+  </section>
+</main>
+
+<nav class="hidden" id="appNav">
+  <button data-nav="home" class="on"><span class="ico">🏠</span>首页</button>
+  <button data-nav="wrong"><span class="ico">📕</span>错题本</button>
+  <button data-nav="stats"><span class="ico">📊</span>统计</button>
+  <button data-nav="set"><span class="ico">👤</span>我的</button>
+</nav>
+
+<script src="srs.js"></script>
+<script src="words_data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

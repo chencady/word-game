@@ -1,0 +1,17 @@
+{
+  "name": "词根背单词 · 高考高频词",
+  "short_name": "词根背单词",
+  "description": "高考 651 高频词 · 艾宾浩斯记忆曲线 · 听音写词/看中写词/错题本/积分等级",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#16233F",
+  "theme_color": "#16233F",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

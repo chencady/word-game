@@ -1,0 +1,8 @@
+{
+  "name": "word-root-game",
+  "version": "1.0.0",
+  "description": "高考高频词 · 词根背单词游戏（艾宾浩斯记忆曲线）",
+  "scripts": {
+    "dev": "node server.js"
+  }
+}
