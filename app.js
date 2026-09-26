@@ -275,6 +275,7 @@
     var w = item.w;
     touchToday();
     game.qStart = Date.now();
+    game.answered = false;
     $('streakBar').textContent = game.streak >= 2 ? '🔥 连对 ' + game.streak : '';
     $('prog').style.width = Math.round(game.idx / game.queue.length * 100) + '%';
 
@@ -357,9 +358,21 @@
     fb.scrollIntoView({ block: 'nearest' });
   }
 
+  function lockAnswerUI() {
+    game.answered = true;
+    ['knowBtn', 'unknowBtn', 'ansBtn'].forEach(function (id) {
+      var el = $(id);
+      if (el) { el.disabled = true; el.style.opacity = '.45'; }
+    });
+    var inp = $('ansInput');
+    if (inp) inp.disabled = true;
+  }
+
   function checkAnswer(w, rawInput) {
+    if (game.answered) return;
     var input = norm(rawInput);
     if (!input) return;
+    lockAnswerUI();
     var rec = state.records[w.w] || { stage: 0 };
     var now = Date.now();
     var quick = (now - game.qStart) < 5000;
@@ -383,6 +396,8 @@
   }
 
   function answerLearn(w, know) {
+    if (game.answered) return;
+    lockAnswerUI();
     var now = Date.now();
     touchToday();
     state.today.done++;
